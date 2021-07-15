@@ -28,6 +28,6 @@ func RegisterRoutes(router *gin.Engine) {
     apiRouter := router.Group("/api")
     {
         // 短地址
-        apiRouter.POST("/short-url", controllers.ShortUrl)
+        apiRouter.POST("/short-url", controllers.CreateShortUrl)
     }
 }

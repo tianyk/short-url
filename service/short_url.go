@@ -49,7 +49,7 @@ func init() {
 var (
     // 存放ID计数器的Key
     UrlIdCounterKey = []byte("URL-ID")
-    InitId          = []byte("46656")
+    InitUrlId       = []byte("46656")
 )
 
 // newId 获取一个新的ID
@@ -60,7 +60,7 @@ func newId() (int64, error) {
     currentIdBytes, err := store.Get(UrlIdCounterKey, readOpt)
     if err != nil {
         if err == errors.ErrNotFound {
-            currentIdBytes = InitId
+            currentIdBytes = InitUrlId
         } else {
             return 0, err
         }
@@ -80,6 +80,7 @@ func newId() (int64, error) {
     return nextId, nil
 }
 
+// CreateShortUrl 生成短地址
 func CreateShortUrl(url string) (string, error) {
     id, err := newId()
     if err != nil {
@@ -92,6 +93,7 @@ func CreateShortUrl(url string) (string, error) {
     return urlId, err
 }
 
+// FindLongUrl 查询短地址对应的长地址
 func FindLongUrl(urlId string) (string, error) {
     longUrlBytes, err := store.Get([]byte("s-"+urlId), readOpt)
     if err != nil {

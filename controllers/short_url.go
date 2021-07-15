@@ -12,7 +12,7 @@ import (
     "short-url/vo"
 )
 
-func ShortUrl(ctx *gin.Context) {
+func CreateShortUrl(ctx *gin.Context) {
     body := new(vo.ShortUrlVo)
     fmt.Println(ctx.ContentType())
     err := ctx.ShouldBind(&body)
