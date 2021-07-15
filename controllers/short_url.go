@@ -25,7 +25,7 @@ func ShortUrl(ctx *gin.Context) {
         panic(fmt.Errorf("create short url: %s", err.Error()))
     }
 
-    ctx.String(200, fmt.Sprintf("%s/%s", config.Config.Prefix, urlId))
+    ctx.String(http.StatusOK, fmt.Sprintf("%s/%s", config.Config.Prefix, urlId))
 }
 
 func OpenShortUrl(ctx *gin.Context) {
