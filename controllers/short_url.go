@@ -5,7 +5,6 @@ import (
     "net/http"
 
     "github.com/gin-gonic/gin"
-    "github.com/gin-gonic/gin/binding"
     leveldbErrors "github.com/syndtr/goleveldb/leveldb/errors"
 
     "short-url/config"
@@ -15,7 +14,8 @@ import (
 
 func ShortUrl(ctx *gin.Context) {
     body := new(vo.ShortUrlVo)
-    err := ctx.MustBindWith(body, binding.FormPost)
+    fmt.Println(ctx.ContentType())
+    err := ctx.ShouldBind(&body)
     if err != nil {
         panic(fmt.Errorf("invalid request body: %s", err.Error()))
     }
