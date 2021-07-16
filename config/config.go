@@ -11,6 +11,7 @@ import (
 type config struct {
     Port   int    `env:"APP_PORT" envDefault: 5000`
     Prefix string `env:"APP_PREFIX" `
+    Token  string `env:"APP_TOKEN"`
 }
 
 var Config = new(config)
@@ -23,4 +24,6 @@ func init() {
 
     Config.Port = port
     Config.Prefix = os.Getenv("APP_PREFIX")
+
+    Config.Token = os.Getenv("APP_TOKEN")
 }

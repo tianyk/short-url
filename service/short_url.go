@@ -2,6 +2,7 @@ package service
 
 import (
     "log"
+    "math/rand"
     "os"
     "os/signal"
     "path"
@@ -23,6 +24,10 @@ var (
     readOpt  = &opt.ReadOptions{DontFillCache: false}
     writeOpt = &opt.WriteOptions{Sync: false, NoWriteMerge: false}
 )
+
+func getCacheKey(urlId string) string {
+    return "s-" + urlId
+}
 
 func init() {
     workspace, err := os.Getwd()
@@ -72,7 +77,8 @@ func newId() (int64, error) {
         return 0, err
     }
 
-    nextId := currentId + 1
+    offset := rand.Int63n(100) + 1
+    nextId := currentId + offset
     err = store.Put(UrlIdCounterKey, []byte(strconv.FormatInt(nextId, 10)), writeOpt)
     if err != nil {
         return 0, err
@@ -90,14 +96,15 @@ func CreateShortUrl(url string) (string, error) {
     }
 
     urlId := strconv.FormatInt(id, 36)
-    err = store.Put([]byte("s-"+urlId), []byte(url), writeOpt)
+    log.Printf("[%s <=> %s]", urlId, url)
+    err = store.Put([]byte(getCacheKey(urlId)), []byte(url), writeOpt)
 
     return urlId, err
 }
 
 // FindLongUrl 查询短地址对应的长地址
 func FindLongUrl(urlId string) (string, error) {
-    longUrlBytes, err := store.Get([]byte("s-"+urlId), readOpt)
+    longUrlBytes, err := store.Get([]byte(getCacheKey(urlId)), readOpt)
     if err != nil {
         return "", err
     }
