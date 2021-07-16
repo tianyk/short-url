@@ -1,6 +1,7 @@
 package service
 
 import (
+    "log"
     "os"
     "os/signal"
     "path"
@@ -9,7 +10,7 @@ import (
     "syscall"
 
     "github.com/syndtr/goleveldb/leveldb"
-    "github.com/syndtr/goleveldb/leveldb/errors"
+    leveldbErrors "github.com/syndtr/goleveldb/leveldb/errors"
     "github.com/syndtr/goleveldb/leveldb/opt"
 )
 
@@ -59,7 +60,7 @@ func newId() (int64, error) {
 
     currentIdBytes, err := store.Get(UrlIdCounterKey, readOpt)
     if err != nil {
-        if err == errors.ErrNotFound {
+        if err == leveldbErrors.ErrNotFound {
             currentIdBytes = InitUrlId
         } else {
             return 0, err
@@ -77,6 +78,7 @@ func newId() (int64, error) {
         return 0, err
     }
 
+    log.Printf("nextId: %d\n", nextId)
     return nextId, nil
 }
 

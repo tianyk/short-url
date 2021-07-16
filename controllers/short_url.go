@@ -4,6 +4,7 @@ import (
     "fmt"
     "net/http"
 
+    "github.com/PuerkitoBio/purell"
     "github.com/gin-gonic/gin"
     leveldbErrors "github.com/syndtr/goleveldb/leveldb/errors"
 
@@ -14,7 +15,6 @@ import (
 
 func CreateShortUrl(ctx *gin.Context) {
     body := new(vo.ShortUrlVo)
-    fmt.Println(ctx.ContentType())
     err := ctx.ShouldBind(&body)
     if err != nil {
         panic(fmt.Errorf("invalid request body: %s", err.Error()))
@@ -25,7 +25,7 @@ func CreateShortUrl(ctx *gin.Context) {
         panic(fmt.Errorf("create short url: %s", err.Error()))
     }
 
-    ctx.String(http.StatusOK, fmt.Sprintf("%s/%s", config.Config.Prefix, urlId))
+    ctx.String(http.StatusOK, purell.MustNormalizeURLString(fmt.Sprintf("%s/%s", config.Config.Prefix, urlId), purell.FlagRemoveDuplicateSlashes))
 }
 
 func OpenShortUrl(ctx *gin.Context) {
