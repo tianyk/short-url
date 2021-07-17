@@ -1,11 +1,12 @@
 package middleware
 
 import (
-    "fmt"
     "log"
     "net/http"
 
     "github.com/gin-gonic/gin"
+
+    "short-url/errors"
 )
 
 
@@ -20,7 +21,11 @@ func Token(token string) gin.HandlerFunc {
         }
 
         if xToken := ctx.GetHeader("x-token"); xToken != token {
-            ctx.AbortWithError(http.StatusForbidden, fmt.Errorf("invalid token"))
+            ctx.Error(&errors.HttpError{
+                Status: http.StatusForbidden,
+                Message: "invalid token",
+            })
+            ctx.Abort()
         } else {
             ctx.Next()
         }

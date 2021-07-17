@@ -14,15 +14,12 @@ func ErrorHandler(ctx *gin.Context) {
     if length := len(ctx.Errors); length > 0 {
         err := ctx.Errors.Last().Err
 
-        //if err != nil && !ctx.Writer.Written() {
-        if err != nil {
+        if err != nil && !ctx.Writer.Written() {
             switch e := err.(type) {
+            case *errors.HttpError:
+                ctx.String(e.Status, err.Error())
             case *gin.Error:
-                ctx.Status(http.StatusInternalServerError)
-                ctx.Writer.Write([]byte(e.Error()))
-            case errors.HttpError:
-                ctx.Status(e.Status)
-                ctx.Writer.Write([]byte(e.Message))
+                ctx.String(http.StatusInternalServerError, err.Error())
             case error:
                 ctx.Writer.Write([]byte(e.Error()))
             }
