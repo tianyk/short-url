@@ -12,8 +12,9 @@ func ErrorHandler(ctx *gin.Context) {
     ctx.Next()
 
     if length := len(ctx.Errors); length > 0 {
-        err := ctx.Errors[length-1].Err
+        err := ctx.Errors.Last().Err
 
+        //if err != nil && !ctx.Writer.Written() {
         if err != nil {
             switch e := err.(type) {
             case *gin.Error:
