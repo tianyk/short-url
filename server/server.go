@@ -20,6 +20,7 @@ func Run(httpServer *gin.Engine) {
 
     httpServer.Use(gin.Logger())
     httpServer.Use(middleware.Recovery)
+    httpServer.Use(middleware.ErrorHandler)
 
     // 注册路由
     routes.RegisterRoutes(httpServer)
