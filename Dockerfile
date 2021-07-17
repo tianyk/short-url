@@ -22,6 +22,7 @@ ENV APP_PORT=3000
 WORKDIR /usr/src/app/
 COPY --from=builder /usr/src/app/shorturl /usr/src/app/.env ./
 
+VOLUME /usr/src/app/short-url-store
 EXPOSE 3000
 
 CMD ["./shorturl"]

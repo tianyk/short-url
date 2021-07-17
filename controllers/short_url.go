@@ -5,6 +5,7 @@ import (
     "net/http"
 
     "github.com/PuerkitoBio/purell"
+    validator "github.com/asaskevich/govalidator"
     "github.com/gin-gonic/gin"
     leveldbErrors "github.com/syndtr/goleveldb/leveldb/errors"
 
@@ -40,5 +41,9 @@ func OpenShortUrl(ctx *gin.Context) {
         }
     }
 
-    ctx.Redirect(http.StatusMovedPermanently, longUrl)
+    if validator.IsURL(longUrl) {
+        ctx.Redirect(http.StatusMovedPermanently, longUrl)
+    } else {
+        ctx.String(http.StatusOK, longUrl)
+    }
 }
