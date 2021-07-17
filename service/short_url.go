@@ -20,6 +20,15 @@ var (
     dbLock sync.Mutex
 )
 
+// 随机偏移
+var randomOffset = [100]int64{
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+    4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43,
+}
+
 var (
     readOpt  = &opt.ReadOptions{DontFillCache: false}
     writeOpt = &opt.WriteOptions{Sync: false, NoWriteMerge: false}
@@ -77,7 +86,7 @@ func newId() (int64, error) {
         return 0, err
     }
 
-    offset := rand.Int63n(100) + 1
+    offset := randomOffset[rand.Intn(len(randomOffset))]
     nextId := currentId + offset
     err = store.Put(UrlIdCounterKey, []byte(strconv.FormatInt(nextId, 10)), writeOpt)
     if err != nil {

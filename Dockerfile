@@ -10,15 +10,18 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o app
+RUN CGO_ENABLED=0 GOOS=linux go build -o shorturl
 
 FROM alpine:latest
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
-    && apk --no-cache add ca-certificates
-    
+#RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
+#    && apk --no-cache add ca-certificates
+
+ENV GIN_MODE=release
+ENV APP_PORT=3000
+
 WORKDIR /usr/src/app/
-COPY --from=builder /usr/src/app/app /usr/src/app/.env ./
+COPY --from=builder /usr/src/app/shorturl /usr/src/app/.env ./
 
-EXPOSE 4000
+EXPOSE 3000
 
-CMD ["./app"]
+CMD ["./shorturl"]

@@ -28,5 +28,9 @@ func Run(httpServer *gin.Engine) {
     httpServer.NoRoute(notFoundHandler)
 
     // 启动
-    httpServer.Run(fmt.Sprintf(":%d", config.Config.Port))
+    addr := fmt.Sprintf(":%d", config.Config.Port)
+    err := httpServer.Run(addr)
+    if err != nil {
+        panic(fmt.Errorf("start error: %s", err.Error()))
+    }
 }

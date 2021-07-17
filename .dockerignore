@@ -1,0 +1,7 @@
+vendor/
+short-url-store/
+tmp/
+.temp/
+**/*.DS_Store
+.idea/
+README.md
