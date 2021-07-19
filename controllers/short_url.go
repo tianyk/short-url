@@ -37,11 +37,11 @@ func OpenShortUrl(ctx *gin.Context) {
     urlId := ctx.Param("urlId")
     longUrl, err := service.FindLongUrl(urlId)
     if err != nil {
-        if err == leveldbErrors.ErrNotFound {
+        if errors.Cause(err) == leveldbErrors.ErrNotFound {
             ctx.String(http.StatusNotFound, "NotFound")
             return
         } else {
-            panic(errors.Wrap(err, "Open short url error"))
+            panic(errors.WithMessage(err, "Open short url error"))
         }
     }
 
