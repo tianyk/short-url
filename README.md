@@ -1,6 +1,10 @@
 ### 短地址服务
 
 ```bash
+ protoc --gofast_out=. **/*.proto
+```
+
+```bash
 go run main.go
 ```
 ```bash

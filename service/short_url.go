@@ -10,11 +10,14 @@ import (
     "strconv"
     "sync"
     "syscall"
+    "time"
 
     "github.com/pkg/errors"
     "github.com/syndtr/goleveldb/leveldb"
     leveldbErrors "github.com/syndtr/goleveldb/leveldb/errors"
     "github.com/syndtr/goleveldb/leveldb/opt"
+
+    "short-url/proto"
 )
 
 var (
@@ -109,17 +112,38 @@ func CreateShortUrl(url string) (string, error) {
 
     urlId := strconv.FormatInt(id, 36)
     log.Printf("[%s <=> %s]", urlId, url)
-    err = store.Put([]byte(getCacheKey(urlId)), []byte(url), writeOpt)
+
+    message := proto.ShortUrlMessage{
+        LongUrl: url,
+    }
+    data, err := message.Marshal()
+    if err != nil {
+        return "", errors.Wrap(err, "Protobuf marshal error")
+    }
+    err = store.Put([]byte(getCacheKey(urlId)), data, writeOpt)
 
     return urlId, errors.Wrap(err, "Set shortUrl error")
 }
 
 // FindLongUrl 查询短地址对应的长地址
 func FindLongUrl(urlId string) (string, error) {
-    longUrlBytes, err := store.Get([]byte(getCacheKey(urlId)), readOpt)
+    cacheKey := []byte(getCacheKey(urlId))
+    data, err := store.Get(cacheKey, readOpt)
     if err != nil {
         return "", errors.Wrap(err, "Get longUrl error")
     }
 
-    return string(longUrlBytes), nil
+    message := new(proto.ShortUrlMessage)
+    err = message.Unmarshal(data)
+    if err != nil {
+        return "", errors.Wrap(err, "Protobuf unmarshal error")
+    }
+
+    if now := time.Now().UnixNano(); message.Expire > 0 && message.Expire < now {
+        // 过期
+        store.Delete(cacheKey, writeOpt)
+        return "", leveldbErrors.ErrNotFound
+    }
+
+    return message.LongUrl, nil
 }
