@@ -18,7 +18,7 @@ func notFoundHandler(ctx *gin.Context) {
 func Run(httpServer *gin.Engine) {
     httpServer = gin.New()
 
-    httpServer.Use(gin.Logger())
+    httpServer.Use(middleware.RequestLog)
     httpServer.Use(middleware.Recovery)
     httpServer.Use(middleware.ErrorHandler)
 

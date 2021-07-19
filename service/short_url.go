@@ -10,6 +10,7 @@ import (
     "sync"
     "syscall"
 
+    "github.com/pkg/errors"
     "github.com/syndtr/goleveldb/leveldb"
     leveldbErrors "github.com/syndtr/goleveldb/leveldb/errors"
     "github.com/syndtr/goleveldb/leveldb/opt"
@@ -77,23 +78,22 @@ func newId() (int64, error) {
         if err == leveldbErrors.ErrNotFound {
             currentIdBytes = InitUrlId
         } else {
-            return 0, err
+            return 0, errors.Wrap(err, "Get last urlId error")
         }
     }
 
     currentId, err := strconv.ParseInt(string(currentIdBytes), 10, 64)
     if err != nil {
-        return 0, err
+        return 0, errors.WithStack(err)
     }
 
     offset := randomOffset[rand.Intn(len(randomOffset))]
     nextId := currentId + offset
     err = store.Put(UrlIdCounterKey, []byte(strconv.FormatInt(nextId, 10)), writeOpt)
     if err != nil {
-        return 0, err
+        return 0, errors.WithStack(err)
     }
 
-    log.Printf("nextId: %d\n", nextId)
     return nextId, nil
 }
 
@@ -108,14 +108,14 @@ func CreateShortUrl(url string) (string, error) {
     log.Printf("[%s <=> %s]", urlId, url)
     err = store.Put([]byte(getCacheKey(urlId)), []byte(url), writeOpt)
 
-    return urlId, err
+    return urlId, errors.Wrap(err, "Set shortUrl error")
 }
 
 // FindLongUrl 查询短地址对应的长地址
 func FindLongUrl(urlId string) (string, error) {
     longUrlBytes, err := store.Get([]byte(getCacheKey(urlId)), readOpt)
     if err != nil {
-        return "", err
+        return "", errors.Wrap(err, "Get longUrl error")
     }
 
     return string(longUrlBytes), nil
