@@ -1,0 +1,18 @@
+version: '3'
+services:
+  app:
+    image: doog/short-url:latest
+    restart: on-failure
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://127.0.0.1:3000/_heartbeat" ] # 设置检测程序
+      interval: 10s # 设置检测间隔
+      timeout: 10s # 设置检测超时时间
+      retries: 3 # 设置重试次数
+      start_period: 30s # 启动后，多少秒开始启动检测程序
+    ports:
+      - 127.0.0.1:5050:3000
+    environment:
+      APP_PREFIX: http://example.com/
+      APP_TOKEN: YOUR_TOKEN
+    volumes:
+      - /data/short-url-store:/usr/src/app/short-url-store

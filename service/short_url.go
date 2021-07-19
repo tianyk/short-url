@@ -6,6 +6,7 @@ import (
     "os"
     "os/signal"
     "path"
+    "regexp"
     "strconv"
     "sync"
     "syscall"
@@ -20,6 +21,8 @@ var (
     store  *leveldb.DB
     dbLock sync.Mutex
 )
+
+var UrlIdRegexp = regexp.MustCompile("[^0-9a-z]+$")
 
 // 随机偏移
 var randomOffset = [100]int64{

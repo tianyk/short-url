@@ -2,7 +2,6 @@ package server
 
 import (
     "fmt"
-    "net/http"
 
     "github.com/gin-gonic/gin"
 
@@ -11,22 +10,17 @@ import (
     "short-url/routes"
 )
 
-func notFoundHandler(ctx *gin.Context) {
-    ctx.String(http.StatusNotFound, "NotFound")
-}
-
 func Run(httpServer *gin.Engine) {
     httpServer = gin.New()
+    // 404
+    httpServer.NoRoute(middleware.NotFoundHandler)
 
-    httpServer.Use(middleware.RequestLog)
     httpServer.Use(middleware.Recovery)
     httpServer.Use(middleware.ErrorHandler)
+    httpServer.Use(middleware.RequestLog)
 
     // 注册路由
     routes.RegisterRoutes(httpServer)
-
-    // 404
-    httpServer.NoRoute(notFoundHandler)
 
     // 启动
     addr := fmt.Sprintf(":%d", config.Config.Port)

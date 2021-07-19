@@ -8,6 +8,7 @@ import (
     "short-url/config"
     "short-url/controllers"
     "short-url/middleware"
+    "short-url/service"
 )
 
 func heartbeat(ctx *gin.Context) {
@@ -24,7 +25,10 @@ func RegisterRoutes(router *gin.Engine) {
     router.GET("/_heartbeat", heartbeat)
 
     // 跳转
-    router.GET("/s/:urlId", controllers.OpenShortUrl)
+    router.GET("/:urlId", middleware.When(func(ctx *gin.Context) bool {
+        urlId := ctx.Param("urlId")
+        return len(urlId) >= 4 && len(urlId) <= 8 && service.UrlIdRegexp.MatchString(urlId)
+    }, controllers.CreateShortUrl, middleware.NotFoundHandler))
 
     // api group
     apiRouter := router.Group("/api")

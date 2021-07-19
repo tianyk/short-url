@@ -15,6 +15,7 @@ import (
     "short-url/vo"
 )
 
+// CreateShortUrl 生成短地址
 func CreateShortUrl(ctx *gin.Context) {
     body := new(vo.ShortUrlVo)
     err := ctx.ShouldBind(&body)
@@ -31,6 +32,7 @@ func CreateShortUrl(ctx *gin.Context) {
     ctx.String(http.StatusOK, shortUrl)
 }
 
+// OpenShortUrl 访问原页面
 func OpenShortUrl(ctx *gin.Context) {
     urlId := ctx.Param("urlId")
     longUrl, err := service.FindLongUrl(urlId)
