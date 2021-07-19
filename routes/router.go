@@ -28,7 +28,7 @@ func RegisterRoutes(router *gin.Engine) {
     router.GET("/:urlId", middleware.When(func(ctx *gin.Context) bool {
         urlId := ctx.Param("urlId")
         return len(urlId) >= 4 && len(urlId) <= 8 && service.UrlIdRegexp.MatchString(urlId)
-    }, controllers.CreateShortUrl, middleware.NotFoundHandler))
+    }, controllers.OpenShortUrl, middleware.NotFoundHandler))
 
     // api group
     apiRouter := router.Group("/api")
