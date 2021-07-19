@@ -18,7 +18,7 @@ import (
 // CreateShortUrl 生成短地址
 func CreateShortUrl(ctx *gin.Context) {
     body := new(vo.ShortUrlVo)
-    err := ctx.ShouldBind(&body)
+    err := ctx.ShouldBind(body)
     if err != nil {
         panic(errors.Wrap(err, "Invalid request body"))
     }
