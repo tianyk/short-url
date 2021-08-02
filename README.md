@@ -24,7 +24,8 @@ curl -X POST \
   -H 'content-type: application/json' \
   -H 'x-token: YOUR_TOKEN' \
   -d '{
-	"longUrl": "http://www.example.com"
+	"longUrl": "http://www.example.com",
+	"maxAge": "1d"
 }'
 ```
 
