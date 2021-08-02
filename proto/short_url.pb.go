@@ -24,7 +24,7 @@ const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type ShortUrlMessage struct {
 	LongUrl              string   `protobuf:"bytes,1,opt,name=longUrl,proto3" json:"longUrl,omitempty"`
-	MaxAge               int64    `protobuf:"varint,2,opt,name=maxAge,proto3" json:"maxAge,omitempty"`
+	Expire               int64    `protobuf:"varint,2,opt,name=expire,proto3" json:"expire,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -70,9 +70,9 @@ func (m *ShortUrlMessage) GetLongUrl() string {
 	return ""
 }
 
-func (m *ShortUrlMessage) GetMaxAge() int64 {
+func (m *ShortUrlMessage) GetExpire() int64 {
 	if m != nil {
-		return m.MaxAge
+		return m.Expire
 	}
 	return 0
 }
@@ -89,10 +89,10 @@ var fileDescriptor_98c00b1926e3452e = []byte{
 	0xc9, 0xd7, 0x2f, 0xce, 0xc8, 0x2f, 0x2a, 0x89, 0x2f, 0x2d, 0xca, 0xd1, 0x03, 0xf3, 0x95, 0x9c,
 	0xb9, 0xf8, 0x83, 0x41, 0x42, 0xa1, 0x45, 0x39, 0xbe, 0xa9, 0xc5, 0xc5, 0x89, 0xe9, 0xa9, 0x42,
 	0x12, 0x5c, 0xec, 0x39, 0xf9, 0x79, 0xe9, 0xa1, 0x45, 0x39, 0x12, 0x8c, 0x0a, 0x8c, 0x1a, 0x9c,
-	0x41, 0x30, 0xae, 0x90, 0x18, 0x17, 0x5b, 0x6e, 0x62, 0x85, 0x63, 0x7a, 0xaa, 0x04, 0x93, 0x02,
+	0x41, 0x30, 0xae, 0x90, 0x18, 0x17, 0x5b, 0x6a, 0x45, 0x41, 0x66, 0x51, 0xaa, 0x04, 0x93, 0x02,
 	0xa3, 0x06, 0x73, 0x10, 0x94, 0xe7, 0x24, 0x7e, 0xe2, 0x91, 0x1c, 0xe3, 0x85, 0x47, 0x72, 0x8c,
 	0x0f, 0x1e, 0xc9, 0x31, 0xce, 0x78, 0x2c, 0xc7, 0x10, 0xc5, 0x0a, 0x36, 0x3d, 0x89, 0x0d, 0x4c,
-	0x19, 0x03, 0x02, 0x00, 0x00, 0xff, 0xff, 0xed, 0xf8, 0x20, 0x2f, 0x7d, 0x00, 0x00, 0x00,
+	0x19, 0x03, 0x02, 0x00, 0x00, 0xff, 0xff, 0x87, 0xbc, 0x1e, 0xf9, 0x7d, 0x00, 0x00, 0x00,
 }
 
 func (m *ShortUrlMessage) Marshal() (dAtA []byte, err error) {
@@ -119,8 +119,8 @@ func (m *ShortUrlMessage) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i -= len(m.XXX_unrecognized)
 		copy(dAtA[i:], m.XXX_unrecognized)
 	}
-	if m.MaxAge != 0 {
-		i = encodeVarintShortUrl(dAtA, i, uint64(m.MaxAge))
+	if m.Expire != 0 {
+		i = encodeVarintShortUrl(dAtA, i, uint64(m.Expire))
 		i--
 		dAtA[i] = 0x10
 	}
@@ -155,8 +155,8 @@ func (m *ShortUrlMessage) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovShortUrl(uint64(l))
 	}
-	if m.MaxAge != 0 {
-		n += 1 + sovShortUrl(uint64(m.MaxAge))
+	if m.Expire != 0 {
+		n += 1 + sovShortUrl(uint64(m.Expire))
 	}
 	if m.XXX_unrecognized != nil {
 		n += len(m.XXX_unrecognized)
@@ -233,9 +233,9 @@ func (m *ShortUrlMessage) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field MaxAge", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Expire", wireType)
 			}
-			m.MaxAge = 0
+			m.Expire = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowShortUrl
@@ -245,7 +245,7 @@ func (m *ShortUrlMessage) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.MaxAge |= int64(b&0x7F) << shift
+				m.Expire |= int64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}

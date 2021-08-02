@@ -3,14 +3,17 @@ package controllers
 import (
     "fmt"
     "net/http"
+    "time"
 
     "github.com/PuerkitoBio/purell"
     validator "github.com/asaskevich/govalidator"
     "github.com/gin-gonic/gin"
     "github.com/pkg/errors"
     leveldbErrors "github.com/syndtr/goleveldb/leveldb/errors"
+    str2duration "github.com/xhit/go-str2duration/v2"
 
     "short-url/config"
+    "short-url/proto"
     "short-url/service"
     "short-url/vo"
 )
@@ -23,7 +26,15 @@ func CreateShortUrl(ctx *gin.Context) {
         panic(errors.Wrap(err, "Invalid request body"))
     }
 
-    urlId, err := service.CreateShortUrl(body.LongUrl)
+    duration, _ := str2duration.ParseDuration("365d")
+    if body.MaxAge != "" {
+        duration, err = str2duration.ParseDuration(body.MaxAge)
+        if err != nil {
+            panic(errors.Wrap(err, fmt.Sprintf("Invalid MaxAge %s", body.MaxAge)))
+        }
+    }
+
+    urlId, err := service.CreateShortUrl(&proto.ShortUrlMessage{LongUrl: body.LongUrl, Expire: time.Now().Add(duration).Unix()})
     if err != nil {
         panic(errors.Wrap(err, "Create short url error"))
     }

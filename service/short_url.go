@@ -104,18 +104,15 @@ func newId() (int64, error) {
 }
 
 // CreateShortUrl 生成短地址
-func CreateShortUrl(url string) (string, error) {
+func CreateShortUrl(message *proto.ShortUrlMessage) (string, error) {
     id, err := newId()
     if err != nil {
         return "", err
     }
 
     urlId := strconv.FormatInt(id, 36)
-    log.Printf("[%s <=> %s]", urlId, url)
+    log.Printf("[%s <=> %s] %d", urlId, message.LongUrl, message.Expire)
 
-    message := proto.ShortUrlMessage{
-        LongUrl: url,
-    }
     data, err := message.Marshal()
     if err != nil {
         return "", errors.Wrap(err, "Protobuf marshal error")
@@ -139,7 +136,8 @@ func FindLongUrl(urlId string) (string, error) {
         return "", errors.Wrap(err, "Protobuf unmarshal error")
     }
 
-    if now := time.Now().UnixNano(); message.Expire > 0 && message.Expire < now {
+    if now := time.Now().Unix(); message.Expire > 0 && message.Expire < now {
+        log.Printf("expire %s", urlId)
         // 过期
         store.Delete(cacheKey, writeOpt)
         return "", leveldbErrors.ErrNotFound
