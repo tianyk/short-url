@@ -26,7 +26,7 @@ func CreateShortUrl(ctx *gin.Context) {
         panic(errors.Wrap(err, "Invalid request body"))
     }
 
-    duration, _ := str2duration.ParseDuration("365d")
+    duration, _ := str2duration.ParseDuration("1d")
     if body.MaxAge != "" {
         duration, err = str2duration.ParseDuration(body.MaxAge)
         if err != nil {
