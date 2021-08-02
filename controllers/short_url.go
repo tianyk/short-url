@@ -40,7 +40,11 @@ func CreateShortUrl(ctx *gin.Context) {
     }
 
     shortUrl := purell.MustNormalizeURLString(fmt.Sprintf("%s/%s", config.Config.Prefix, urlId), purell.FlagRemoveDuplicateSlashes)
-    ctx.String(http.StatusOK, shortUrl)
+    //ctx.String(http.StatusOK, shortUrl)
+    ctx.JSON(http.StatusOK, &vo.ShortUrlVo{
+        LongUrl:  body.LongUrl,
+        ShortUrl: shortUrl,
+    })
 }
 
 // OpenShortUrl 访问原页面
