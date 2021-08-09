@@ -23,6 +23,8 @@ func RegisterRoutes(router *gin.Engine) {
 
     // 心跳
     router.GET("/_heartbeat", heartbeat)
+    // GC
+    router.GET("/_gc", middleware.Token(config.Config.Token), controllers.GC)
 
     // 跳转
     router.GET("/:urlId", middleware.When(func(ctx *gin.Context) bool {

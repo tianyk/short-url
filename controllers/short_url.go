@@ -66,3 +66,12 @@ func OpenShortUrl(ctx *gin.Context) {
         ctx.String(http.StatusOK, longUrl)
     }
 }
+
+func GC(ctx *gin.Context) {
+    err := service.GC()
+    if err != nil {
+        panic(errors.WithMessage(err, "gc error"))
+    }
+
+    ctx.String(http.StatusOK, "gc ok")
+}

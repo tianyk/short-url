@@ -1,6 +1,7 @@
 package service
 
 import (
+    "context"
     "log"
     "math/rand"
     "os"
@@ -46,24 +47,34 @@ func getCacheKey(urlId string) string {
 }
 
 func init() {
+    // 初始化数据库
     workspace, err := os.Getwd()
     if err != nil {
         panic(err)
     }
-
     db, err := leveldb.OpenFile(path.Join(workspace, "short-url-store"), nil)
     if err != nil {
         panic(err)
     }
     store = db
 
-    // 关闭数据库
+    // 启动GC 1小时一次
+    ctx, cancel := context.WithCancel(context.Background())
+    go startGC(ctx, time.Hour)
+
+    // 停止信号
     sigs := make(chan os.Signal)
     signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
     go func() {
         // 接收信号
         <-sigs
+        // 取消子任务
+        cancel()
+        // 关闭DB
         store.Close()
+
+        // 10s后退出程序
+        <-time.After(10 * time.Second)
         os.Exit(0)
     }()
 }
@@ -144,4 +155,60 @@ func FindLongUrl(urlId string) (string, error) {
     }
 
     return message.LongUrl, nil
+}
+
+// GC 清理过期的 key
+func GC() error {
+    // 迭代器
+    iter := store.NewIterator(nil, nil)
+    // 批量处理
+    batch := new(leveldb.Batch)
+
+    // 遍历迭代器
+    for iter.Next() {
+        key := iter.Key()
+        value := iter.Value()
+
+        // 反序列化。如果失败，则不是 proto.ShortUrlMessage
+        message := new(proto.ShortUrlMessage)
+        err := message.Unmarshal(value)
+        if err != nil {
+            continue
+        }
+
+        // 判断是否过期
+        if now := time.Now().Unix(); message.Expire > 0 && message.Expire < now {
+            // 过期
+            log.Printf("expire %s", key)
+            batch.Delete(key)
+        }
+    }
+    iter.Release()
+    err := iter.Error()
+    if err != nil {
+        return errors.Wrap(err, "迭代器异常。")
+    }
+
+    // 批处理
+    err = store.Write(batch, writeOpt)
+    return errors.Wrap(err, "批量删除异常。")
+}
+
+// startGC 启动GC
+func startGC(ctx context.Context, duration time.Duration) {
+    log.Printf("start GC")
+    for {
+        select {
+        case <-ctx.Done():
+            log.Printf("stop GC")
+            // 停止
+            return
+        case <-time.After(duration):
+            // 定时GC
+            err := GC()
+            if err != nil {
+                log.Printf("GC失败 %s", errors.Cause(err).Error())
+            }
+        }
+    }
 }
