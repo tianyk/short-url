@@ -17,7 +17,7 @@ import (
     "short-url/routes"
 )
 
-func Run() {
+func setupRouter() *gin.Engine {
     app := gin.New()
     // 404
     app.NoRoute(middleware.NotFoundHandler)
@@ -28,6 +28,12 @@ func Run() {
 
     // 注册路由
     routes.RegisterRoutes(app)
+
+    return app
+}
+
+func Run() {
+    app := setupRouter()
 
     // 启动
     addr := fmt.Sprintf(":%d", config.Config.Port)

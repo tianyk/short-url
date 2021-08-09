@@ -147,7 +147,7 @@ func FindLongUrl(urlId string) (string, error) {
         log.Printf("expire %s", urlId)
         // 过期
         store.Delete(cacheKey, writeOpt)
-        return "", leveldbErrors.ErrNotFound
+        return "", errors.Wrap(leveldbErrors.ErrNotFound, "NotFound")
     }
 
     return message.LongUrl, nil
