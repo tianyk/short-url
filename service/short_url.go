@@ -66,16 +66,12 @@ func init() {
     sigs := make(chan os.Signal)
     signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
     go func() {
-        // 接收信号
+        // 接收信号d
         <-sigs
         // 取消子任务
         cancel()
         // 关闭DB
         store.Close()
-
-        // 10s后退出程序
-        <-time.After(10 * time.Second)
-        os.Exit(0)
     }()
 }
 
