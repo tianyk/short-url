@@ -36,14 +36,14 @@ func TestFindLongUrl(t *testing.T) {
         t.Error(err)
     }
 
-    longUrl, err := FindLongUrl(urlId)
+    longUrl, err := FindLongUrl(urlId, "")
     if err != nil {
         t.Error(err)
     }
     assert.Equal(t, longUrl, "Test")
 
     time.Sleep(2 * time.Second)
-    _, err = FindLongUrl(urlId)
+    _, err = FindLongUrl(urlId, "")
     assert.Equal(t, leveldbErrors.ErrNotFound, errors.Cause(err))
 }
 
