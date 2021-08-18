@@ -23,7 +23,6 @@ func setupRouter() *gin.Engine {
     app.NoRoute(middleware.NotFoundHandler)
 
     app.Use(middleware.Recovery)
-    app.Use(middleware.ErrorHandler)
     app.Use(middleware.RequestLog)
 
     // 注册路由
@@ -42,6 +41,7 @@ func Run() {
         Handler: app,
     }
     go func() {
+        log.Printf("Listening on port %s", addr)
         // service connections
         if err := httpServer.ListenAndServe(); err != nil {
             log.Printf("listen: %s\n", err)
