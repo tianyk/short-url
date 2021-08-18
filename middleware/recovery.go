@@ -33,6 +33,12 @@ func Recovery(ctx *gin.Context) {
                 }
             }
 
+            // HttpError 处理
+            if err, ok := recovered.(errors2.HttpError); ok {
+                ctx.String(err.Status, err.Error())
+                return
+            }
+
             log.Printf("%s %s [%s], %+v ", ctx.Request.Method, ctx.Request.URL, reflect.TypeOf(recovered).String(), recovered)
             switch err := recovered.(type) {
             case error:
@@ -41,7 +47,7 @@ func Recovery(ctx *gin.Context) {
                 case validator.ValidationErrors:
                     ctx.String(http.StatusBadRequest, e.Error())
                 case errors2.HttpError:
-                    ctx.String(e.Status, e.Message)
+                    ctx.String(e.Status, e.Error())
                 case error:
                     ctx.String(http.StatusInternalServerError, e.Error())
                 }

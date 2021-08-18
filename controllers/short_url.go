@@ -10,11 +10,12 @@ import (
     "github.com/gin-gonic/gin"
     "github.com/pkg/errors"
     leveldbErrors "github.com/syndtr/goleveldb/leveldb/errors"
-    str2duration "github.com/xhit/go-str2duration/v2"
+    "github.com/xhit/go-str2duration/v2"
 
     "short-url/config"
     "short-url/proto"
     "short-url/service"
+    "short-url/utils"
     "short-url/vo"
 )
 
@@ -34,23 +35,36 @@ func CreateShortUrl(ctx *gin.Context) {
         }
     }
 
-    urlId, err := service.CreateShortUrl(&proto.ShortUrlMessage{LongUrl: body.LongUrl, Expire: time.Now().Add(duration).Unix()})
+    var password string
+    if body.Scope == "private" {
+        password = utils.RandomString(4)
+    }
+
+    urlId, err := service.CreateShortUrl(&proto.ShortUrlMessage{LongUrl: body.LongUrl, Expire: time.Now().Add(duration).Unix(), Password: password})
     if err != nil {
         panic(errors.Wrap(err, "Create short url error"))
     }
 
     shortUrl := purell.MustNormalizeURLString(fmt.Sprintf("%s/%s", config.Config.Prefix, urlId), purell.FlagRemoveDuplicateSlashes)
-    //ctx.String(http.StatusOK, shortUrl)
     ctx.JSON(http.StatusOK, &vo.ShortUrlVo{
         LongUrl:  body.LongUrl,
         ShortUrl: shortUrl,
+        Password: password,
     })
 }
 
 // OpenShortUrl 访问原页面
 func OpenShortUrl(ctx *gin.Context) {
     urlId := ctx.Param("urlId")
-    longUrl, err := service.FindLongUrl(urlId)
+
+    // query 前四位为密码
+    var password string
+    rawQuery := ctx.Request.URL.RawQuery
+    if len(rawQuery) >= 4 {
+        password = rawQuery[0:4]
+    }
+
+    longUrl, err := service.FindLongUrl(urlId, password)
     if err != nil {
         if errors.Cause(err) == leveldbErrors.ErrNotFound {
             ctx.String(http.StatusNotFound, "NotFound")

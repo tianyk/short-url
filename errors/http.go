@@ -1,5 +1,9 @@
 package errors
 
+import (
+    "net/http"
+)
+
 type HttpError struct {
     Status  int
     Message string
@@ -7,9 +11,14 @@ type HttpError struct {
 }
 
 func (err HttpError) Error() string {
+    var message string
+    if err.Message == "" {
+        message = http.StatusText(err.Status)
+    }
+
     if err.Err != nil {
-        return err.Message + ": " + err.Err.Error()
+        return message + ": " + err.Err.Error()
     } else {
-        return err.Message
+        return message
     }
 }

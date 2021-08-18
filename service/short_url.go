@@ -4,6 +4,7 @@ import (
     "context"
     "log"
     "math/rand"
+    "net/http"
     "os"
     "os/signal"
     "path"
@@ -18,6 +19,7 @@ import (
     leveldbErrors "github.com/syndtr/goleveldb/leveldb/errors"
     "github.com/syndtr/goleveldb/leveldb/opt"
 
+    errors2 "short-url/errors"
     "short-url/proto"
 )
 
@@ -130,7 +132,7 @@ func CreateShortUrl(message *proto.ShortUrlMessage) (string, error) {
 }
 
 // FindLongUrl 查询短地址对应的长地址
-func FindLongUrl(urlId string) (string, error) {
+func FindLongUrl(urlId, password string) (string, error) {
     cacheKey := []byte(getCacheKey(urlId))
     data, err := store.Get(cacheKey, readOpt)
     if err != nil {
@@ -141,6 +143,10 @@ func FindLongUrl(urlId string) (string, error) {
     err = message.Unmarshal(data)
     if err != nil {
         return "", errors.Wrap(err, "Protobuf unmarshal error")
+    }
+
+    if message.Password != "" && message.Password != password {
+        return "", errors.WithStack(errors2.HttpError{Status: http.StatusForbidden})
     }
 
     if now := time.Now().Unix(); message.Expire > 0 && message.Expire < now {
