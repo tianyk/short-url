@@ -13,6 +13,7 @@ import (
     "github.com/xhit/go-str2duration/v2"
 
     "short-url/config"
+    errors2 "short-url/errors"
     "short-url/proto"
     "short-url/service"
     "short-url/utils"
@@ -65,11 +66,16 @@ func OpenShortUrl(ctx *gin.Context) {
     }
 
     longUrl, err := service.FindLongUrl(urlId, password)
-    if err != nil {
-        if errors.Cause(err) == leveldbErrors.ErrNotFound {
+    if originErr := errors.Cause(err); originErr != nil {
+        if originErr == leveldbErrors.ErrNotFound {
+            // 没有记录错误
             ctx.String(http.StatusNotFound, "NotFound")
             return
+        } else if httpErr, ok := originErr.(errors2.HttpError); ok && httpErr.Status == http.StatusForbidden {
+            // HTTP 403错误
+            ctx.HTML(httpErr.Status, "authorization.html", gin.H{})
         } else {
+            // 原始错误
             panic(errors.WithMessage(err, "Open short url error"))
         }
     }

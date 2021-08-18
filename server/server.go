@@ -19,6 +19,8 @@ import (
 
 func setupRouter() *gin.Engine {
     app := gin.New()
+    // view
+    app.LoadHTMLGlob("views/*")
     // 404
     app.NoRoute(middleware.NotFoundHandler)
 
