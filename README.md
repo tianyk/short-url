@@ -5,12 +5,13 @@ go test -v ./...
 ```
 
 ```bash
- protoc --gofast_out=. **/*.proto
+protoc --gofast_out=. **/*.proto
 ```
 
 ```bash
 go run main.go
 ```
+
 ```bash
 docker run --name=short-url \
 	-d \
@@ -42,4 +43,10 @@ server {
         proxy_pass http://127.0.0.1:3000;
     }
 }
+```
+
+```shell
+docker build \
+  -t shorturl:release \
+  .
 ```
