@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>短地址生成器</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+			background:
+				radial-gradient(600px 400px at 85% 10%, rgba(37, 99, 235, 0.07), transparent 60%),
+				radial-gradient(500px 350px at 10% 90%, rgba(37, 99, 235, 0.05), transparent 60%),
+				#f4f6f8;
+			min-height: 100vh;
+			min-height: 100dvh;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 20px;
+			-webkit-tap-highlight-color: transparent;
+		}
+
+		.container {
+			background: white;
+			border-radius: 12px;
+			border: 1px solid #e5e7eb;
+			box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 12px 32px rgba(0, 0, 0, 0.08);
+			padding: clamp(24px, 5vw, 40px);
+			width: 100%;
+			max-width: 500px;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.container::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 3px;
+			background: #2563eb;
+		}
+
+		.header {
+			text-align: center;
+			margin-bottom: 30px;
+		}
+
+		.header h3 {
+			color: #111827;
+			font-size: clamp(22px, 6vw, 28px);
+			font-weight: 700;
+			margin-bottom: 8px;
+		}
+
+		.form-group {
+			margin-bottom: 24px;
+		}
+
+		.form-label {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			margin-bottom: 8px;
+			color: #374151;
+			font-weight: 600;
+			font-size: 14px;
+		}
+
+		.label-icon {
+			width: 14px;
+			height: 14px;
+			color: #2563eb;
+			flex-shrink: 0;
+		}
+
+		.form-textarea {
+			width: 100%;
+			min-height: clamp(80px, 14vh, 100px);
+			padding: 14px 16px;
+			border: 1px solid #d1d5db;
+			border-radius: 8px;
+			font-size: 16px;
+			line-height: 1.5;
+			resize: vertical;
+			transition: border-color 0.2s ease, box-shadow 0.2s ease;
+			font-family: inherit;
+			background: white;
+		}
+
+		.form-textarea:focus {
+			outline: none;
+			border-color: #2563eb;
+			box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+		}
+
+		.form-textarea::placeholder {
+			color: #9ca3af;
+		}
+
+		.form-select {
+			width: 100%;
+			padding: 14px 16px;
+			border: 1px solid #d1d5db;
+			border-radius: 8px;
+			font-size: 16px;
+			background: white;
+			background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+			background-repeat: no-repeat;
+			background-position: right 14px center;
+			appearance: none;
+			-webkit-appearance: none;
+			cursor: pointer;
+			transition: border-color 0.2s ease, box-shadow 0.2s ease;
+			font-family: inherit;
+		}
+
+		.form-select:focus {
+			outline: none;
+			border-color: #2563eb;
+			box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+		}
+
+		.submit-btn {
+			width: 100%;
+			padding: 14px 16px;
+			background: #2563eb;
+			color: white;
+			border: none;
+			border-radius: 8px;
+			font-size: 16px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: background 0.2s ease, box-shadow 0.2s ease;
+			position: relative;
+			overflow: hidden;
+			touch-action: manipulation;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 8px;
+		}
+
+		.btn-arrow {
+			width: 18px;
+			height: 18px;
+			transition: transform 0.2s ease;
+		}
+
+		.submit-btn:hover {
+			background: #1d4ed8;
+			box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+		}
+
+		.submit-btn:hover .btn-arrow {
+			transform: translateX(3px);
+		}
+
+		.submit-btn:active {
+			background: #1e40af;
+		}
+
+		.submit-btn:disabled {
+			opacity: 0.6;
+			cursor: not-allowed;
+			transform: none;
+		}
+
+		.loading {
+			display: none;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+		}
+
+		.loading::after {
+			content: '';
+			width: 20px;
+			height: 20px;
+			border: 2px solid transparent;
+			border-top: 2px solid white;
+			border-radius: 50%;
+			animation: spin 1s linear infinite;
+		}
+
+		@keyframes spin {
+			0% { transform: rotate(0deg); }
+			100% { transform: rotate(360deg); }
+		}
+
+		.result {
+			margin-top: 24px;
+			padding: 16px;
+			background: #f9fafb;
+			border-radius: 8px;
+			border: 1px solid #e5e7eb;
+			border-left: 3px solid #16a34a;
+			display: none;
+		}
+
+		.result-label {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			font-weight: 600;
+			color: #111827;
+			margin-bottom: 8px;
+		}
+
+		.result-icon {
+			width: 16px;
+			height: 16px;
+			color: #16a34a;
+			flex-shrink: 0;
+		}
+
+		.result-url-row {
+			display: flex;
+			align-items: stretch;
+		}
+
+		.result-url {
+			flex: 1;
+			min-width: 0;
+			display: flex;
+			align-items: center;
+			color: #1d4ed8;
+			word-break: break-all;
+			font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+			background: white;
+			padding: 12px;
+			border-radius: 6px 0 0 6px;
+			border: 1px solid #2563eb;
+			border-right: none;
+		}
+
+		.result-qr {
+			margin-top: 12px;
+			display: flex;
+			justify-content: center;
+			background: white;
+			padding: 12px;
+			border: 1px solid #e5e7eb;
+			border-radius: 8px;
+		}
+
+		.result-qr img,
+		.result-qr canvas {
+			width: 160px;
+			height: 160px;
+		}
+
+		.copy-btn {
+			flex-shrink: 0;
+			padding: 0 16px;
+			background: white;
+			color: #2563eb;
+			border: 1px solid #2563eb;
+			border-left: none;
+			border-radius: 0 6px 6px 0;
+			font-size: 13px;
+			font-weight: 500;
+			cursor: pointer;
+			transition: background 0.2s ease, color 0.2s ease;
+		}
+
+		.copy-btn:hover {
+			background: #eff6ff;
+		}
+
+		@media (max-width: 480px) {
+			body {
+				padding: 0;
+			}
+
+			.container {
+				padding: 20px;
+				margin: 10px;
+				border-radius: 12px;
+			}
+
+			.header h3 {
+				font-size: 22px;
+			}
+
+			.form-textarea {
+				min-height: 80px;
+			}
+
+			.result-qr img,
+			.result-qr canvas {
+				width: 140px;
+				height: 140px;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="header">
+			<h3>短地址生成器</h3>
+		</div>
+
+		<form id="shortUrlForm">
+			<div class="form-group">
+				<label class="form-label" for="longUrl">
+					<svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+						<path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+					</svg>
+					长网址
+				</label>
+				<textarea
+					id="longUrl"
+					class="form-textarea"
+					placeholder="请输入要缩短的网址"
+				></textarea>
+			</div>
+
+			<div class="form-group">
+				<label class="form-label" for="maxAge">
+					<svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="12" cy="12" r="10"/>
+						<polyline points="12 6 12 12 16 14"/>
+					</svg>
+					有效期
+				</label>
+				<select id="maxAge" class="form-select">
+					<option value="1d">1天</option>
+					<option value="7d">7天</option>
+					<option value="30d">30天</option>
+					<option value="1095d">3年</option>
+				</select>
+			</div>
+
+			<button type="submit" class="submit-btn" id="submitBtn">
+				<span id="btnText">生成短地址</span>
+				<svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+					<line x1="5" y1="12" x2="19" y2="12"/>
+					<polyline points="12 5 19 12 12 19"/>
+				</svg>
+				<div class="loading" id="loading"></div>
+			</button>
+		</form>
+
+		<div class="result" id="result">
+			<div class="result-label">
+				<svg class="result-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+					<polyline points="22 4 12 14.01 9 11.01"/>
+				</svg>
+				生成的短地址：
+			</div>
+			<div class="result-url-row">
+				<div class="result-url" id="resultUrl"></div>
+				<button class="copy-btn" id="copyBtn">复制链接</button>
+			</div>
+			<div class="result-qr" id="resultQr">
+				<div id="qrCode"></div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const form = document.getElementById('shortUrlForm');
+		const submitBtn = document.getElementById('submitBtn');
+		const btnText = document.getElementById('btnText');
+		const loading = document.getElementById('loading');
+		const result = document.getElementById('result');
+		const resultUrl = document.getElementById('resultUrl');
+		const resultQr = document.getElementById('resultQr');
+		const qrCode = document.getElementById('qrCode');
+		const copyBtn = document.getElementById('copyBtn');
+
+		// API 配置
+		const API_URL = '/api/short-url';
+		const API_TOKEN = 'OGU0OWMxMjI3ZDA2N2U3NTI2OTFkODQzNDVhYzk4NDM=';
+
+		form.addEventListener('submit', async function(e) {
+			e.preventDefault();
+
+			const longUrl = document.getElementById('longUrl').value.trim();
+			const maxAge = document.getElementById('maxAge').value;
+
+			if (!longUrl) {
+				alert('请输入要缩短的网址');
+				return;
+			}
+
+			// 显示加载状态
+			setLoading(true);
+			result.style.display = 'none';
+
+			try {
+				const response = await fetch(API_URL, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'X-Token': atob(API_TOKEN)
+					},
+					body: JSON.stringify({
+						longUrl: longUrl,
+						maxAge: maxAge
+					})
+				});
+
+				if (!response.ok) {
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
+
+				const data = await response.json();
+
+				if (data.shortUrl) {
+					// 显示结果
+					resultUrl.textContent = data.shortUrl;
+					result.style.display = 'block';
+
+					// 生成二维码
+					if (window.QRCode) {
+						qrCode.innerHTML = '';
+						new QRCode(qrCode, {
+							text: data.shortUrl,
+							width: 160,
+							height: 160,
+							colorDark: '#111827',
+							colorLight: '#ffffff',
+							correctLevel: QRCode.CorrectLevel.M
+						});
+						resultQr.style.display = 'flex';
+					} else {
+						resultQr.style.display = 'none';
+					}
+
+					// 弹出提示
+					// alert(`短地址生成成功！\n${data.shortUrl}`);
+				} else {
+					throw new Error('返回数据格式错误');
+				}
+
+			} catch (error) {
+				console.error('Error:', error);
+				alert('生成短地址失败，请稍后重试。错误信息：' + error.message);
+			} finally {
+				setLoading(false);
+			}
+		});
+
+		// 复制功能
+		copyBtn.addEventListener('click', function() {
+			const url = resultUrl.textContent;
+
+			if (navigator.clipboard) {
+				navigator.clipboard.writeText(url).then(function() {
+					copyBtn.textContent = '已复制！';
+					setTimeout(() => {
+						copyBtn.textContent = '复制链接';
+					}, 2000);
+				}).catch(function() {
+					fallbackCopy(url);
+				});
+			} else {
+				fallbackCopy(url);
+			}
+		});
+
+		// 设置加载状态
+		function setLoading(isLoading) {
+			if (isLoading) {
+				submitBtn.disabled = true;
+				btnText.style.opacity = '0';
+				loading.style.display = 'block';
+			} else {
+				submitBtn.disabled = false;
+				btnText.style.opacity = '1';
+				loading.style.display = 'none';
+			}
+		}
+
+		// 备用复制方法
+		function fallbackCopy(text) {
+			const textArea = document.createElement('textarea');
+			textArea.value = text;
+			textArea.style.position = 'fixed';
+			textArea.style.left = '-999999px';
+			textArea.style.top = '-999999px';
+			document.body.appendChild(textArea);
+			textArea.focus();
+			textArea.select();
+
+			try {
+				document.execCommand('copy');
+				copyBtn.textContent = '已复制！';
+				setTimeout(() => {
+					copyBtn.textContent = '复制链接';
+				}, 2000);
+			} catch (err) {
+				alert('复制失败，请手动复制：' + text);
+			}
+
+			document.body.removeChild(textArea);
+		}
+
+		// 自动聚焦到输入框
+		document.getElementById('longUrl').focus();
+	</script>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</body>
+</html>
