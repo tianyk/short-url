@@ -4,10 +4,10 @@ import (
 	stderrors "errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/PuerkitoBio/purell"
-	validator "github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/xhit/go-str2duration/v2"
@@ -87,9 +87,18 @@ func (c *ShortURLController) OpenShortURL(ctx *gin.Context) {
 		panic(errors.WithMessage(err, "Open short url error"))
 	}
 
-	if validator.IsURL(longUrl) {
+	if isRedirectableURL(longUrl) {
 		ctx.Redirect(http.StatusMovedPermanently, longUrl)
 	} else {
 		ctx.String(http.StatusOK, longUrl)
 	}
+}
+
+// isRedirectableURL reports whether content is an absolute http(s) URL that can be redirected to.
+func isRedirectableURL(raw string) bool {
+	u, err := url.Parse(raw)
+	if err != nil {
+		return false
+	}
+	return (u.Scheme == "http" || u.Scheme == "https") && u.Host != ""
 }
