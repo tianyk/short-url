@@ -5,9 +5,9 @@ services:
     image: doog/short-url:latest
     restart: on-failure
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://127.0.0.1:3000/_heartbeat" ] # 设置检测程序
-      interval: 10s # 设置检测间隔
-      timeout: 10s # 设置检测超时时间
+      test: [ "CMD-SHELL", "wget -qO- http://127.0.0.1:3000/_heartbeat | grep -qx ok" ] # alpine 无 curl，用 busybox wget
+      interval: 10s # 设置检查间隔
+      timeout: 10s # 设置检查超时时间
       retries: 3 # 设置重试次数
 #      start_period: 30s # 启动后，多少秒开始启动检测程序
     ports:

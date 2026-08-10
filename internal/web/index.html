@@ -382,7 +382,7 @@
 
 		// API 配置
 		const API_URL = '/api/short-url';
-		const API_TOKEN = 'OGU0OWMxMjI3ZDA2N2U3NTI2OTFkODQzNDVhYzk4NDM=';
+		const API_TOKEN = '{{.Token}}';
 
 		form.addEventListener('submit', async function(e) {
 			e.preventDefault();
@@ -512,6 +512,6 @@
 		document.getElementById('longUrl').focus();
 	</script>
 
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+	<script src="/static/qrcode.min.js"></script>
 </body>
 </html>

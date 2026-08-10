@@ -2,5 +2,6 @@ vendor/
 short-url-store/
 tmp/
 .temp/
+/shorturl
 **/*.DS_Store
 .idea/
