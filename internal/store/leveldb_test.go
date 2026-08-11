@@ -8,7 +8,7 @@ import (
 )
 
 func TestLevelDBStoreContract(t *testing.T) {
-	storage, err := OpenLevelDB(filepath.Join(t.TempDir(), "store"))
+	storage, err := Open(filepath.Join(t.TempDir(), "store"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -76,7 +76,7 @@ func TestLevelDBStoreContract(t *testing.T) {
 
 func TestLevelDBStorePersistsExistingFormat(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "store")
-	storage, err := OpenLevelDB(path)
+	storage, err := Open(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,7 +90,7 @@ func TestLevelDBStorePersistsExistingFormat(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	reopened, err := OpenLevelDB(path)
+	reopened, err := Open(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -107,7 +107,7 @@ func TestLevelDBStorePersistsExistingFormat(t *testing.T) {
 }
 
 func TestLevelDBIteratePropagatesCallbackError(t *testing.T) {
-	storage, err := OpenLevelDB(filepath.Join(t.TempDir(), "store"))
+	storage, err := Open(filepath.Join(t.TempDir(), "store"))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -21,7 +21,7 @@ func benchmarkService(b *testing.B, storage store.Store) *ShortURLService {
 
 func benchmarkLevelDBService(b *testing.B) *ShortURLService {
 	b.Helper()
-	storage, err := store.OpenLevelDB(filepath.Join(b.TempDir(), "store"))
+	storage, err := store.Open(filepath.Join(b.TempDir(), "store"))
 	if err != nil {
 		b.Fatal(err)
 	}

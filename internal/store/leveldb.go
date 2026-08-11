@@ -17,8 +17,8 @@ type leveldbStore struct {
 	writeOpt   *opt.WriteOptions
 }
 
-// OpenLevelDB opens a LevelDB-backed Store at path.
-func OpenLevelDB(path string) (Store, error) {
+// Open opens a LevelDB-backed Store at path.
+func Open(path string) (Store, error) {
 	db, err := leveldb.OpenFile(path, nil)
 	if err != nil {
 		return nil, fmt.Errorf("open leveldb: %w", err)

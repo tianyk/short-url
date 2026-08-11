@@ -208,7 +208,7 @@ func TestDeleteExpiredURLsInBoundedBatches(t *testing.T) {
 }
 
 func TestDeleteExpiredURLsFromLevelDBInMultipleBatches(t *testing.T) {
-	storage, err := store.OpenLevelDB(filepath.Join(t.TempDir(), "store"))
+	storage, err := store.Open(filepath.Join(t.TempDir(), "store"))
 	if err != nil {
 		t.Fatal(err)
 	}

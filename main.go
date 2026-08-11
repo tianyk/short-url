@@ -29,7 +29,7 @@ func run() (err error) {
 		return fmt.Errorf("load config: %w", err)
 	}
 
-	storage, err := store.OpenLevelDB(cfg.StorePath)
+	storage, err := store.Open(cfg.StorePath)
 	if err != nil {
 		return err
 	}
