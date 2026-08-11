@@ -2,6 +2,7 @@ vendor/
 short-url-store/
 tmp/
 .temp/
+build-errors.log
 /shorturl
 **/*.DS_Store
 .idea/

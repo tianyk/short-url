@@ -49,15 +49,65 @@
 		}
 
 		.header {
+			position: relative;
 			text-align: center;
 			margin-bottom: 30px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.history-btn {
+			position: absolute;
+			right: 0;
+			top: 50%;
+			transform: translateY(-50%);
+			display: flex;
+			align-items: center;
+			gap: 4px;
+			padding: 6px;
+			background: none;
+			border: none;
+			color: #6b7280;
+			font-size: 13px;
+			font-weight: 500;
+			cursor: pointer;
+			border-radius: 6px;
+			transition: background 0.2s ease, color 0.2s ease;
+			touch-action: manipulation;
+		}
+
+		.history-btn::after {
+			content: '';
+			position: absolute;
+			inset: -8px;
+			border-radius: 6px;
+		}
+
+		.history-btn:hover {
+			color: #2563eb;
+			background: rgba(37, 99, 235, 0.06);
+		}
+
+		.history-btn:active {
+			background: rgba(37, 99, 235, 0.12);
+		}
+
+		.history-btn-icon {
+			width: 15px;
+			height: 15px;
+			color: #9ca3af;
+			transition: color 0.2s ease;
+		}
+
+		.history-btn:hover .history-btn-icon {
+			color: #2563eb;
 		}
 
 		.header h3 {
 			color: #111827;
 			font-size: clamp(22px, 6vw, 28px);
 			font-weight: 700;
-			margin-bottom: 8px;
 		}
 
 		.form-group {
@@ -276,6 +326,205 @@
 			background: #eff6ff;
 		}
 
+		/* ===== 历史记录全屏页面 ===== */
+		.history-overlay {
+			position: fixed;
+			inset: 0;
+			background: #fff;
+			z-index: 1000;
+			overflow-y: auto;
+			-webkit-overflow-scrolling: touch;
+			display: none;
+		}
+
+		.history-overlay.open {
+			display: block;
+		}
+
+		.history-topbar {
+			position: sticky;
+			top: 0;
+			z-index: 10;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: #fff;
+			padding: clamp(24px, 5vw, 40px) 16px 16px;
+		}
+
+		.history-topbar h3 {
+			font-size: clamp(22px, 6vw, 28px);
+			font-weight: 700;
+			color: #111827;
+		}
+
+		.history-close {
+			position: absolute;
+			right: clamp(16px, 4vw, 32px);
+			top: 50%;
+			transform: translateY(-50%);
+			width: 36px;
+			height: 36px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: transparent;
+			border: none;
+			border-radius: 6px;
+			cursor: pointer;
+			color: #6b7280;
+			transition: background 0.2s ease, color 0.2s ease;
+			touch-action: manipulation;
+		}
+
+		.history-close:hover {
+			background: #f3f4f6;
+			color: #111827;
+		}
+
+		.history-close:active {
+			background: #e5e7eb;
+		}
+
+		.history-close-icon {
+			width: 18px;
+			height: 18px;
+		}
+
+		.history-container {
+			max-width: 720px;
+			margin: 0 auto;
+			padding: clamp(16px, 4vw, 32px);
+		}
+
+		.history-list {
+			padding-bottom: 24px;
+		}
+
+		.history-card {
+			background: #fff;
+			border: 1px solid #e5e7eb;
+			border-radius: 12px;
+			padding: 14px 16px;
+			margin-bottom: 12px;
+			transition: border-color 0.2s ease, box-shadow 0.2s ease;
+		}
+
+		.history-card:hover {
+			border-color: #d1d5db;
+			box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+		}
+
+		.history-card-top {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 12px;
+		}
+
+		.history-card-bottom {
+			display: flex;
+			align-items: flex-start;
+			justify-content: space-between;
+			gap: 12px;
+			margin-top: 6px;
+		}
+
+		.history-short {
+			flex: 1;
+			min-width: 0;
+			color: #111827;
+			font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+			font-size: 15px;
+			font-weight: 600;
+			word-break: break-all;
+		}
+
+		.history-long {
+			flex: 1;
+			min-width: 0;
+			color: #6b7280;
+			font-size: 14px;
+			line-height: 1.5;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		.history-meta {
+			flex-shrink: 0;
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			color: #9ca3af;
+			font-size: 12px;
+			padding-top: 2px;
+		}
+
+		.history-meta-icon {
+			width: 13px;
+			height: 13px;
+			flex-shrink: 0;
+		}
+
+		.history-copy-btn {
+			flex-shrink: 0;
+			padding: 4px 10px;
+			background: #fff;
+			color: #2563eb;
+			border: 1px solid #2563eb;
+			border-radius: 6px;
+			font-size: 12px;
+			font-weight: 500;
+			cursor: pointer;
+			transition: background 0.2s ease, color 0.2s ease;
+			touch-action: manipulation;
+		}
+
+		.history-copy-btn:hover {
+			background: #eff6ff;
+		}
+
+		.history-copy-btn:active {
+			background: #dbeafe;
+		}
+
+		.history-copy-btn.copied {
+			pointer-events: none;
+		}
+
+		.history-empty {
+			display: none;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			padding: 80px 20px;
+			text-align: center;
+			color: #9ca3af;
+		}
+
+		.history-empty-icon {
+			width: 56px;
+			height: 56px;
+			color: #d1d5db;
+			margin-bottom: 16px;
+		}
+
+		.history-empty p {
+			font-size: 16px;
+			font-weight: 600;
+			color: #6b7280;
+			margin-bottom: 6px;
+		}
+
+		.history-empty span {
+			font-size: 13px;
+		}
+
+		body.no-scroll {
+			overflow: hidden;
+		}
+
 		@media (max-width: 480px) {
 			body {
 				padding: 0;
@@ -289,6 +538,47 @@
 
 			.header h3 {
 				font-size: 22px;
+			}
+
+			.history-btn {
+				padding: 6px;
+			}
+
+			.history-btn::after {
+				inset: -11px;
+			}
+
+			.history-btn-text {
+				display: none;
+			}
+
+			.history-topbar {
+				padding: 20px 12px 12px;
+			}
+
+			.history-topbar h3 {
+				font-size: 20px;
+			}
+
+			.history-container {
+				padding: 12px;
+			}
+
+			.history-card {
+				padding: 12px;
+				margin-bottom: 8px;
+			}
+
+			.history-long {
+				white-space: nowrap;
+			}
+
+			.history-copy-btn {
+				padding: 4px 8px;
+			}
+
+			.history-empty {
+				padding: 60px 20px;
 			}
 
 			.form-textarea {
@@ -307,6 +597,13 @@
 	<div class="container">
 		<div class="header">
 			<h3>短地址生成器</h3>
+			<button type="button" class="history-btn" id="historyBtn" title="历史记录" aria-label="历史记录">
+				<svg class="history-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<circle cx="12" cy="12" r="10"/>
+					<polyline points="12 6 12 12 16 14"/>
+				</svg>
+				<span class="history-btn-text">历史记录</span>
+			</button>
 		</div>
 
 		<form id="shortUrlForm">
@@ -369,6 +666,29 @@
 		</div>
 	</div>
 
+	<div class="history-overlay" id="historyOverlay">
+		<div class="history-topbar">
+			<h3>历史记录</h3>
+			<button type="button" class="history-close" id="historyClose" aria-label="关闭历史记录">
+				<svg class="history-close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<line x1="18" y1="6" x2="6" y2="18"/>
+					<line x1="6" y1="6" x2="18" y2="18"/>
+				</svg>
+			</button>
+		</div>
+		<div class="history-container">
+			<div class="history-list" id="historyList"></div>
+			<div class="history-empty" id="historyEmpty">
+				<svg class="history-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+					<circle cx="12" cy="12" r="10"/>
+					<polyline points="12 6 12 12 16 14"/>
+				</svg>
+				<p>暂无历史记录</p>
+				<span>生成短地址后会自动保存在这里</span>
+			</div>
+		</div>
+	</div>
+
 	<script>
 		const form = document.getElementById('shortUrlForm');
 		const submitBtn = document.getElementById('submitBtn');
@@ -422,6 +742,9 @@
 					// 显示结果
 					resultUrl.textContent = data.shortUrl;
 					result.style.display = 'block';
+
+					// 保存到历史记录
+					saveHistory(longUrl, data.shortUrl, maxAge);
 
 					// 生成二维码
 					if (window.QRCode) {
@@ -507,6 +830,174 @@
 
 			document.body.removeChild(textArea);
 		}
+
+		// ===== 历史记录 =====
+		const HISTORY_KEY = 'shortUrlHistory';
+		const MAX_AGE_MS = {
+			'1d': 86400000,
+			'7d': 604800000,
+			'30d': 2592000000,
+			'1095d': 94608000000
+		};
+		const MAX_AGE_LABEL = {
+			'1d': '1天',
+			'7d': '7天',
+			'30d': '30天',
+			'1095d': '3年'
+		};
+
+		const historyOverlay = document.getElementById('historyOverlay');
+		const historyList = document.getElementById('historyList');
+		const historyEmpty = document.getElementById('historyEmpty');
+		const historyBtn = document.getElementById('historyBtn');
+		const historyClose = document.getElementById('historyClose');
+
+		const HISTORY_COPY_TEXT = '复制链接';
+		const HISTORY_COPIED_TEXT = '已复制！';
+
+		function getHistory() {
+			try {
+				const now = Date.now();
+				const list = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+				return list.filter(item => {
+					const ttl = MAX_AGE_MS[item.maxAge] || MAX_AGE_MS['1d'];
+					return now < (item.createdAt || 0) + ttl;
+				});
+			} catch (e) {
+				return [];
+			}
+		}
+
+		function saveHistory(longUrl, shortUrl, maxAge) {
+			const list = getHistory();
+			list.unshift({ shortUrl, longUrl, maxAge, createdAt: Date.now() });
+			localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+		}
+
+		function formatHistoryTime(ts) {
+			const date = new Date(ts);
+			const now = new Date();
+			const pad = n => String(n).padStart(2, '0');
+			const hhmm = pad(date.getHours()) + ':' + pad(date.getMinutes());
+			const isSameDay = (d1, d2) =>
+				d1.getFullYear() === d2.getFullYear() &&
+				d1.getMonth() === d2.getMonth() &&
+				d1.getDate() === d2.getDate();
+			if (isSameDay(date, now)) return '今天 ' + hhmm;
+			const yesterday = new Date(now);
+			yesterday.setDate(now.getDate() - 1);
+			if (isSameDay(date, yesterday)) return '昨天 ' + hhmm;
+			const mmdd = pad(date.getMonth() + 1) + '-' + pad(date.getDate());
+			if (date.getFullYear() === now.getFullYear()) return mmdd + ' ' + hhmm;
+			return date.getFullYear() + '-' + mmdd + ' ' + hhmm;
+		}
+
+		function copyHistoryText(text, btn) {
+			const feedback = () => {
+				btn.classList.add('copied');
+				btn.textContent = HISTORY_COPIED_TEXT;
+				setTimeout(() => {
+					btn.classList.remove('copied');
+					btn.textContent = HISTORY_COPY_TEXT;
+				}, 2000);
+			};
+			if (navigator.clipboard) {
+				navigator.clipboard.writeText(text).then(feedback).catch(() => {
+					const success = copyHistoryFallback(text);
+					if (success) feedback();
+				});
+			} else {
+				const success = copyHistoryFallback(text);
+				if (success) feedback();
+			}
+		}
+
+		function copyHistoryFallback(text) {
+			const textArea = document.createElement('textarea');
+			textArea.value = text;
+			textArea.style.position = 'fixed';
+			textArea.style.left = '-999999px';
+			textArea.style.top = '-999999px';
+			document.body.appendChild(textArea);
+			textArea.focus();
+			textArea.select();
+			try {
+				document.execCommand('copy');
+				document.body.removeChild(textArea);
+				return true;
+			} catch (err) {
+				document.body.removeChild(textArea);
+				alert('复制失败，请手动复制：' + text);
+				return false;
+			}
+		}
+
+		function renderHistory() {
+			const list = getHistory();
+			historyList.innerHTML = '';
+			historyEmpty.style.display = list.length ? 'none' : 'flex';
+
+			list.forEach(item => {
+				const card = document.createElement('div');
+				card.className = 'history-card';
+
+				const top = document.createElement('div');
+				top.className = 'history-card-top';
+
+				const short = document.createElement('div');
+				short.className = 'history-short';
+				short.textContent = item.shortUrl;
+
+				const copyBtn = document.createElement('button');
+				copyBtn.type = 'button';
+				copyBtn.className = 'history-copy-btn';
+				copyBtn.title = '复制短网址';
+				copyBtn.textContent = HISTORY_COPY_TEXT;
+				copyBtn.addEventListener('click', () => copyHistoryText(item.shortUrl, copyBtn));
+
+				top.appendChild(short);
+				top.appendChild(copyBtn);
+
+				const bottom = document.createElement('div');
+				bottom.className = 'history-card-bottom';
+
+				const long = document.createElement('div');
+				long.className = 'history-long';
+				long.textContent = item.longUrl;
+				long.title = item.longUrl;
+
+				const meta = document.createElement('div');
+				meta.className = 'history-meta';
+				meta.innerHTML = '<svg class="history-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
+					+ ' <span>' + (MAX_AGE_LABEL[item.maxAge] || item.maxAge) + ' · ' + formatHistoryTime(item.createdAt) + '</span>';
+
+				bottom.appendChild(long);
+				bottom.appendChild(meta);
+
+				card.appendChild(top);
+				card.appendChild(bottom);
+				historyList.appendChild(card);
+			});
+		}
+
+		function openHistory() {
+			renderHistory();
+			historyOverlay.classList.add('open');
+			document.body.classList.add('no-scroll');
+		}
+
+		function closeHistory() {
+			historyOverlay.classList.remove('open');
+			document.body.classList.remove('no-scroll');
+		}
+
+		historyBtn.addEventListener('click', openHistory);
+		historyClose.addEventListener('click', closeHistory);
+		document.addEventListener('keydown', function(e) {
+			if (e.key === 'Escape' && historyOverlay.classList.contains('open')) {
+				closeHistory();
+			}
+		});
 
 		// 自动聚焦到输入框
 		document.getElementById('longUrl').focus();
