@@ -5,6 +5,7 @@ go 1.26
 require (
 	github.com/PuerkitoBio/purell v1.2.2
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
+	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-playground/validator/v10 v10.30.3
 	github.com/golang/protobuf v1.5.2

@@ -90,7 +90,7 @@ func (c *ShortURLController) OpenShortURL(ctx *gin.Context) {
 	if isRedirectableURL(longUrl) {
 		ctx.Redirect(http.StatusMovedPermanently, longUrl)
 	} else {
-		ctx.String(http.StatusOK, longUrl)
+		ctx.Data(http.StatusOK, "text/plain; charset=utf-8", []byte(longUrl))
 	}
 }
 

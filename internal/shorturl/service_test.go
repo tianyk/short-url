@@ -99,6 +99,13 @@ func newTestService(t *testing.T, storage store.Store) *ShortURLService {
 	return shortURLService
 }
 
+type fakeStaticMapping map[string]string
+
+func (m fakeStaticMapping) Lookup(key string) (string, bool) {
+	value, ok := m[key]
+	return value, ok
+}
+
 func TestCreateAndFindShortURL(t *testing.T) {
 	shortURLService := newTestService(t, newFakeStore())
 	message := &proto.ShortUrlMessage{
@@ -116,6 +123,48 @@ func TestCreateAndFindShortURL(t *testing.T) {
 	}
 	if longURL != message.LongUrl {
 		t.Fatalf("expected %q, got %q", message.LongUrl, longURL)
+	}
+}
+
+func TestStaticMappingTakesPriorityAndFallsBackToStore(t *testing.T) {
+	storage := newFakeStore()
+	stored := &proto.ShortUrlMessage{
+		LongUrl:  "https://example.com/from-leveldb",
+		Expire:   time.Now().Add(time.Minute).Unix(),
+		Password: "abcd",
+	}
+	storedData, err := stored.Marshal()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := storage.Put([]byte("s-docs"), storedData); err != nil {
+		t.Fatal(err)
+	}
+	if err := storage.Put([]byte("s-other"), storedData); err != nil {
+		t.Fatal(err)
+	}
+
+	service, err := New(storage, WithStaticMapping(fakeStaticMapping{
+		"docs": "https://example.com/from-conf",
+	}))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	value, err := service.FindLongURL("docs", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if value != "https://example.com/from-conf" {
+		t.Fatalf("expected static mapping, got %q", value)
+	}
+
+	value, err = service.FindLongURL("other", "abcd")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if value != stored.LongUrl {
+		t.Fatalf("expected LevelDB fallback, got %q", value)
 	}
 }
 

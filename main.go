@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/tianyk/short-url/internal/httpapi"
 	"github.com/tianyk/short-url/internal/server"
 	"github.com/tianyk/short-url/internal/shorturl"
+	"github.com/tianyk/short-url/internal/staticmap"
 	"github.com/tianyk/short-url/internal/store"
 )
 
@@ -39,7 +41,13 @@ func run() (err error) {
 		}
 	}()
 
-	shortURLService, err := shorturl.New(storage)
+	staticMapPath := filepath.Join(cfg.StorePath, staticmap.Filename)
+	staticMappings, err := staticmap.New(staticMapPath)
+	if err != nil {
+		return err
+	}
+
+	shortURLService, err := shorturl.New(storage, shorturl.WithStaticMapping(staticMappings))
 	if err != nil {
 		return err
 	}
@@ -50,6 +58,10 @@ func run() (err error) {
 
 	cleanupCtx, stopCleanup := context.WithCancel(signalCtx)
 	defer stopCleanup()
+	staticMapDone, err := staticMappings.StartWatching(cleanupCtx)
+	if err != nil {
+		return err
+	}
 	cleanupDone := make(chan struct{})
 	go func() {
 		defer close(cleanupDone)
@@ -59,6 +71,9 @@ func run() (err error) {
 	serverErr := server.Run(signalCtx, cfg, shortURLController)
 	stopCleanup()
 	<-cleanupDone
+	if watchErr := <-staticMapDone; watchErr != nil && serverErr == nil {
+		serverErr = watchErr
+	}
 
 	return serverErr
 }

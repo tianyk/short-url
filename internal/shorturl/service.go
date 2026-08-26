@@ -55,13 +55,29 @@ var randomOffsets = [...]int64{
 
 // ShortURLService contains short URL business logic and depends only on Store.
 type ShortURLService struct {
-	storage   store.Store
-	idMu      sync.Mutex
-	urlIDRand *rand.Rand
+	storage       store.Store
+	staticMapping StaticMapping
+	idMu          sync.Mutex
+	urlIDRand     *rand.Rand
+}
+
+// StaticMapping provides manually maintained mappings that take priority over LevelDB.
+type StaticMapping interface {
+	Lookup(key string) (string, bool)
+}
+
+// Option configures ShortURLService.
+type Option func(*ShortURLService)
+
+// WithStaticMapping configures the highest-priority static mapping lookup.
+func WithStaticMapping(mapping StaticMapping) Option {
+	return func(service *ShortURLService) {
+		service.staticMapping = mapping
+	}
 }
 
 // New explicitly initializes a short URL service.
-func New(storage store.Store) (*ShortURLService, error) {
+func New(storage store.Store, options ...Option) (*ShortURLService, error) {
 	if storage == nil {
 		return nil, fmt.Errorf("store is required")
 	}
@@ -71,10 +87,16 @@ func New(storage store.Store) (*ShortURLService, error) {
 		return nil, fmt.Errorf("seed URL ID generator: %w", err)
 	}
 
-	return &ShortURLService{
+	service := &ShortURLService{
 		storage:   storage,
 		urlIDRand: rand.New(rand.NewSource(int64(binary.LittleEndian.Uint64(seedBytes[:])))),
-	}, nil
+	}
+	for _, option := range options {
+		if option != nil {
+			option(service)
+		}
+	}
+	return service, nil
 }
 
 func shortURLKey(urlID string) string {
@@ -160,6 +182,12 @@ func (s *ShortURLService) CreateShortURL(input *proto.ShortUrlMessage) (string, 
 
 // FindLongURL returns the destination associated with a short URL.
 func (s *ShortURLService) FindLongURL(urlID, password string) (string, error) {
+	if s.staticMapping != nil {
+		if value, ok := s.staticMapping.Lookup(urlID); ok {
+			return value, nil
+		}
+	}
+
 	cacheKey := []byte(shortURLKey(urlID))
 	data, err := s.storage.Get(cacheKey)
 	if err != nil {
