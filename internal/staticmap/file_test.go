@@ -12,14 +12,15 @@ import (
 )
 
 func TestParse(t *testing.T) {
-	parsed, err := parse([]byte("\ufeff# comment\n\ndocs = https://example.com/search?q=test&type=all#result\nnotice=系统维护中\nempty=\n"))
+	parsed, err := parse([]byte("\ufeff# comment\n\nme = https://example.com/search?q=test&type=all#result\nMyPage=系统维护中\nrelease-2026=download\nempty=\n"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	want := map[string]string{
-		"docs":   "https://example.com/search?q=test&type=all#result",
-		"notice": "系统维护中",
-		"empty":  "",
+		"me":           "https://example.com/search?q=test&type=all#result",
+		"MyPage":       "系统维护中",
+		"release-2026": "download",
+		"empty":        "",
 	}
 	if len(parsed) != len(want) {
 		t.Fatalf("expected %d entries, got %d", len(want), len(parsed))
@@ -37,8 +38,15 @@ func TestParseRejectsInvalidLines(t *testing.T) {
 		content string
 	}{
 		{name: "missing separator", content: "docs https://example.com"},
-		{name: "short key", content: "abc=value"},
-		{name: "uppercase key", content: "Docs=value"},
+		{name: "space in key", content: "my page=value"},
+		{name: "slash in key", content: "my/page=value"},
+		{name: "unicode key", content: "我的=value"},
+		{name: "dot segment", content: ".=value"},
+		{name: "parent segment", content: "..=value"},
+		{name: "api namespace", content: "api=value"},
+		{name: "static namespace", content: "static=value"},
+		{name: "heartbeat route", content: "_heartbeat=value"},
+		{name: "too long", content: strings.Repeat("a", maxKeyLength+1) + "=value"},
 		{name: "duplicate key", content: "docs=one\ndocs=two"},
 	}
 	for _, test := range tests {

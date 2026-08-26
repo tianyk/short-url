@@ -33,7 +33,7 @@ func RegisterRoutes(router *gin.Engine, cfg config.Config, shortURLController *S
 	router.GET("/_heartbeat", heartbeat)
 
 	// 跳转
-	router.GET("/:urlID", When(func(ctx *gin.Context) bool {
+	router.GET("/:urlID", shortURLController.OpenStaticMapping, When(func(ctx *gin.Context) bool {
 		urlID := ctx.Param("urlID")
 		return len(urlID) >= 4 && len(urlID) <= 8 && shorturl.URLIDRegexp.MatchString(urlID)
 	}, shortURLController.OpenShortURL, NotFoundHandler))

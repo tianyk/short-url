@@ -21,9 +21,18 @@ const (
 	// Filename is the fixed mapping filename expected in the LevelDB data directory.
 	Filename = "short-url-map.conf"
 
-	maxFileSize = 1024 * 1024
-	reloadDelay = 200 * time.Millisecond
+	maxFileSize  = 1024 * 1024
+	maxKeyLength = 64
+	reloadDelay  = 200 * time.Millisecond
 )
+
+var reservedKeys = map[string]struct{}{
+	".":          {},
+	"..":         {},
+	"api":        {},
+	"static":     {},
+	"_heartbeat": {},
+}
 
 type entries map[string]string
 
@@ -192,8 +201,8 @@ func parse(data []byte) (entries, error) {
 		}
 		key := strings.TrimSpace(line[:separator])
 		value := strings.TrimSpace(line[separator+1:])
-		if !validKey(key) {
-			return nil, fmt.Errorf("line %d: key %q must contain 4-8 lowercase letters or digits", lineNumber, key)
+		if err := validateKey(key); err != nil {
+			return nil, fmt.Errorf("line %d: invalid key %q: %w", lineNumber, key, err)
 		}
 		if _, exists := result[key]; exists {
 			return nil, fmt.Errorf("line %d: duplicate key %q", lineNumber, key)
@@ -206,14 +215,25 @@ func parse(data []byte) (entries, error) {
 	return result, nil
 }
 
-func validKey(key string) bool {
-	if len(key) < 4 || len(key) > 8 {
-		return false
+func validateKey(key string) error {
+	if key == "" {
+		return errors.New("key must not be empty")
 	}
-	for _, character := range key {
-		if (character < 'a' || character > 'z') && (character < '0' || character > '9') {
-			return false
+	if len(key) > maxKeyLength {
+		return fmt.Errorf("key must not exceed %d characters", maxKeyLength)
+	}
+	if _, reserved := reservedKeys[key]; reserved {
+		return errors.New("key is reserved by the HTTP router")
+	}
+	for i := 0; i < len(key); i++ {
+		character := key[i]
+		if (character >= 'a' && character <= 'z') ||
+			(character >= 'A' && character <= 'Z') ||
+			(character >= '0' && character <= '9') ||
+			character == '-' || character == '.' || character == '_' || character == '~' {
+			continue
 		}
+		return errors.New("key may contain only ASCII letters, digits, '-', '.', '_' or '~'")
 	}
-	return true
+	return nil
 }

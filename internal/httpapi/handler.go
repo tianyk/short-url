@@ -17,12 +17,18 @@ import (
 )
 
 type ShortURLController struct {
-	prefix  string
-	service *shorturl.ShortURLService
+	prefix        string
+	service       *shorturl.ShortURLService
+	staticMapping StaticMapping
 }
 
-func NewShortURLController(prefix string, shortURLService *shorturl.ShortURLService) *ShortURLController {
-	return &ShortURLController{prefix: prefix, service: shortURLService}
+// StaticMapping provides manually maintained mappings handled before LevelDB URLs.
+type StaticMapping interface {
+	Lookup(key string) (string, bool)
+}
+
+func NewShortURLController(prefix string, shortURLService *shorturl.ShortURLService, staticMapping StaticMapping) *ShortURLController {
+	return &ShortURLController{prefix: prefix, service: shortURLService, staticMapping: staticMapping}
 }
 
 // CreateShortURL generates a short URL.
@@ -64,6 +70,23 @@ func (c *ShortURLController) CreateShortURL(ctx *gin.Context) {
 	})
 }
 
+// OpenStaticMapping handles a configured static mapping or continues to the LevelDB handler.
+func (c *ShortURLController) OpenStaticMapping(ctx *gin.Context) {
+	if c.staticMapping == nil {
+		ctx.Next()
+		return
+	}
+
+	value, found := c.staticMapping.Lookup(ctx.Param("urlID"))
+	if !found {
+		ctx.Next()
+		return
+	}
+
+	writeDestination(ctx, value)
+	ctx.Abort()
+}
+
 // OpenShortURL 访问原页面
 func (c *ShortURLController) OpenShortURL(ctx *gin.Context) {
 	urlID := ctx.Param("urlID")
@@ -87,10 +110,14 @@ func (c *ShortURLController) OpenShortURL(ctx *gin.Context) {
 		panic(errors.WithMessage(err, "Open short url error"))
 	}
 
-	if isRedirectableURL(longUrl) {
-		ctx.Redirect(http.StatusMovedPermanently, longUrl)
+	writeDestination(ctx, longUrl)
+}
+
+func writeDestination(ctx *gin.Context, value string) {
+	if isRedirectableURL(value) {
+		ctx.Redirect(http.StatusMovedPermanently, value)
 	} else {
-		ctx.Data(http.StatusOK, "text/plain; charset=utf-8", []byte(longUrl))
+		ctx.Data(http.StatusOK, "text/plain; charset=utf-8", []byte(value))
 	}
 }
 

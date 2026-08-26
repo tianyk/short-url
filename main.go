@@ -47,11 +47,11 @@ func run() (err error) {
 		return err
 	}
 
-	shortURLService, err := shorturl.New(storage, shorturl.WithStaticMapping(staticMappings))
+	shortURLService, err := shorturl.New(storage)
 	if err != nil {
 		return err
 	}
-	shortURLController := httpapi.NewShortURLController(cfg.Prefix, shortURLService)
+	shortURLController := httpapi.NewShortURLController(cfg.Prefix, shortURLService, staticMappings)
 
 	signalCtx, stopSignals := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stopSignals()
